@@ -1,6 +1,13 @@
+# Features:
+- Thread safe
+- Multiple caching strategies
+- Full debouncing (Simultaneous calls only hit the data source once)
+- Supports in-memory and remote caches
+- Includes Guice module
+
 # Quick start
 
-## Add guice module to injector
+## Add Guice module to injector
 
 ```kotlin
 val injector = Guice.createInjector(SimpleCacheModule())
@@ -16,6 +23,7 @@ val fetcher = CacheBuilder.build(Strategy.READ_THROUGH) { key: Int ->
 ```
 
 ## Query the fetcher - Results are cached automatically!
+
 ```kotlin
 println(fetcher[1]?.result) // Computes value
 println(fetcher[2]?.result) // Computes value
