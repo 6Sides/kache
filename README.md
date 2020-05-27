@@ -27,9 +27,9 @@ class ExampleFetcher @Inject constructor(
 
 ## Use fetchers - results are automatically cached
 ```kotlin
-println(fetcher[2]?.result)
-println(fetcher[3]?.result)
-println(fetcher[2]?.result)
+println(fetcher[2]?.result) // Computes value
+println(fetcher[3]?.result) // Computes value
+println(fetcher[2]?.result) // Uses cached value
 ```
 
 ### Console output
