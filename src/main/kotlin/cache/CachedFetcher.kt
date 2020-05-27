@@ -33,22 +33,10 @@ abstract class CachedFetcher<K, V> @Inject protected constructor(
 
     /**
      * Fetches and returns the result based on the input
+     *
+     * @return the result of the computation, or null if it failed
      */
     protected abstract fun fetchResult(input: K): CacheableResult<V>?
-
-    /**
-     * Invalidates the result associated with the specified object
-     */
-    /*fun invalidate(key: K) {
-        redis.del(generateHash(key))
-    }*/
-
-    /**
-     * Returns the remaining ttl of the input,value pair associated with the specified object
-     */
-    /*fun getKeyTTL(input: K): Long {
-        return redis.getTTL(generateHash(input)) ?: 0
-    }*/
 
     /**
      * Fetches data based on the specified key.

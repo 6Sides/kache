@@ -1,8 +1,5 @@
 package cache
 
-import cache.CacheStore
-import cache.ConcurrentExpiryHashMap
-
 
 class InMemoryCache: CacheStore {
 

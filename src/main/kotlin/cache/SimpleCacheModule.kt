@@ -9,5 +9,7 @@ class SimpleCacheModule: AbstractModule() {
     override fun configure() {
         bind(CacheStore::class.java).to(InMemoryCache::class.java)
         bind(Serializer::class.java).to(KryoSerializer::class.java)
+
+        requestStaticInjection(CacheBuilder::class.java)
     }
 }

@@ -4,7 +4,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import java.util.concurrent.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 /**
  * Prevents many concurrent calls from independently fetching the same data.
@@ -14,9 +15,9 @@ import java.util.concurrent.*
  */
 class MemoizedComputer<K, V>(private val computeFunction: (key: K) -> V) {
 
-    private val cache: ConcurrentMap<K, Deferred<V?>> = ConcurrentHashMap()
+    private val cache: ConcurrentMap<K, Deferred<V>> = ConcurrentHashMap()
 
-    fun compute(key: K): V? {
+    fun compute(key: K): V {
         var startedComputation = false
         var future = cache[key]
 

@@ -10,12 +10,16 @@ import java.time.LocalDateTime
  * TODO: Remove no arg constructor if/when kryo fixes this
  * THE CLASS MUST HAVE A NO ARGS CONSTRUCTOR OR KRYO WONT BE ABLE TO DESERIALIZE!!!
  *
+ * @param result The result value
+ * @param ttl How long (in seconds) the value will remain in the cache before it is expired
+ * @param lastUpdated A timestamp of the last time the value was computed
+ *
  * @param <V> The type of the result being returned.
  */
 data class CacheableResult<V> constructor(
-        val result: V? = null,
-        val ttl: Int = 0,
-        val lastUpdated: LocalDateTime = LocalDateTime.now()
+    val result: V? = null,
+    val ttl: Int = 0,
+    val lastUpdated: LocalDateTime = LocalDateTime.now()
 ) {
 
     companion object {
