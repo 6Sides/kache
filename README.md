@@ -11,7 +11,7 @@ val injector = Guice.createInjector(SimpleCacheModule())
 ```kotlin
 // Return 10 times the input
 val fetcher = CacheBuilder.build(Strategy.READ_THROUGH) { key: Int ->
-    CacheableResult.of(key*10, 5)
+    CacheableResult.of(key*10, 5) // Result expires after 5 seconds
 }
 ```
 
