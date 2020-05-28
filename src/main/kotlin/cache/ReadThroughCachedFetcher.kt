@@ -17,16 +17,23 @@ abstract class ReadThroughCachedFetcher<K, V> @Inject protected constructor(
         private val LOG by logger()
     }
 
-    override fun fetchResult(input: K): CacheableResult<V>? {
-        var result = super.getValueFromCache(input)
+    private val cacheFunc: (K, CacheableResult<V>?) -> Unit = { key: K, value: CacheableResult<V>? ->
+        value?.let {
+            cacheResult(key, value)
+        }
+    }
+
+    override fun fetchResult(key: K): CacheableResult<V>? {
+        var result = super.getValueFromCache(key)
 
         // Refetch result and cache it if it was not found
         if (result == null) {
-            LOG.debug { "Cache miss for key $input. Recomputing value..." }
-            result = calculateResult(input)
-            cacheResult(input, result)
+            LOG.debug { "Cache miss for key $key. Contacting memoizer" }
+            memo.compute(key, cacheFunc)?.let {
+                result = it
+            }
         } else {
-            LOG.debug { "Cache hit for key $input" }
+            LOG.debug { "Cache hit for key $key" }
         }
 
         return result

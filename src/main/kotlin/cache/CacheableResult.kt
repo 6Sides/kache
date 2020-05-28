@@ -18,7 +18,7 @@ import java.time.LocalDateTime
  */
 data class CacheableResult<V> constructor(
     val result: V? = null,
-    val ttl: Int = 0,
+    @Transient val ttl: Int = 0,
     val lastUpdated: LocalDateTime = LocalDateTime.now()
 ) {
 

@@ -27,7 +27,7 @@ abstract class CachedFetcher<K, V> @Inject protected constructor(
     }
 
     private val collisionCache: ConcurrentMap<K, CacheableResult<V>> = ConcurrentHashMap()
-    private val memo: MemoizedComputer<K, CacheableResult<V>?> = MemoizedComputer { this.fetchResult(it) }
+    val memo: MemoizedComputer<K, CacheableResult<V>?> = MemoizedComputer { this.calculateResult(it) }
 
     protected abstract fun calculateResult(key: K): CacheableResult<V>
 
@@ -36,7 +36,7 @@ abstract class CachedFetcher<K, V> @Inject protected constructor(
      *
      * @return the result of the computation, or null if it failed
      */
-    protected abstract fun fetchResult(input: K): CacheableResult<V>?
+    protected abstract fun fetchResult(key: K): CacheableResult<V>?
 
     /**
      * Fetches data based on the specified key.
@@ -45,7 +45,7 @@ abstract class CachedFetcher<K, V> @Inject protected constructor(
      * @return The value associated with the specified key (can be null)
      */
     operator fun get(key: K): CacheableResult<V>? {
-        return memo.compute(key)
+        return fetchResult(key)
     }
 
     /**

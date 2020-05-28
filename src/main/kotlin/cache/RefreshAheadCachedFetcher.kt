@@ -26,27 +26,27 @@ abstract class RefreshAheadCachedFetcher<K, V> @Inject protected constructor(
         require (refreshAheadFactor in 0f..1f) { "RefreshAheadFactor must be between 0 and 1 inclusive" }
     }
 
-    override fun fetchResult(input: K): CacheableResult<V>? {
-        val needsRefresh: Boolean = !cache.exists(generateHash(input).toString() + "rac")
+    override fun fetchResult(key: K): CacheableResult<V>? {
+        val needsRefresh: Boolean = !cache.exists(generateHash(key).toString() + "rac")
 
         if (needsRefresh) {
             // Refetch result and cache it asynchronously
             GlobalScope.launch {
-                val result = calculateResult(input)
-                cacheResult(input, result)
-                cache.setWithExpiry(generateHash(input).toString() + "rac", byteArrayOf(), (result.ttl * refreshAheadFactor).toLong())
+                val result = calculateResult(key)
+                cacheResult(key, result)
+                cache.setWithExpiry(generateHash(key).toString() + "rac", byteArrayOf(), (result.ttl * refreshAheadFactor).toLong())
             }
         }
 
-        var result = super.getValueFromCache(input)
+        var result = super.getValueFromCache(key)
 
         // Refetch result and cache it
         if (result == null) {
-            LOG.debug { "Cache miss for key $input. Recomputing value..." }
-            result = calculateResult(input)
-            cacheResult(input, result)
+            LOG.debug { "Cache miss for key $key. Recomputing value..." }
+            result = calculateResult(key)
+            cacheResult(key, result)
         } else {
-            LOG.debug { "Cache hit for key $input" }
+            LOG.debug { "Cache hit for key $key" }
         }
 
         return result

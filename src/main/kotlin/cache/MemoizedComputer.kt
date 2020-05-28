@@ -1,9 +1,7 @@
 package cache
 
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import logging.logger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
@@ -15,36 +13,42 @@ import java.util.concurrent.ConcurrentMap
  */
 class MemoizedComputer<K, V>(private val computeFunction: (key: K) -> V) {
 
+    companion object {
+        private val LOG by logger()
+    }
+
     private val cache: ConcurrentMap<K, Deferred<V>> = ConcurrentHashMap()
 
-    fun compute(key: K): V {
+    fun compute(key: K, onComplete: (key: K, value: V) -> Unit): V = runBlocking {
         var startedComputation = false
         var future = cache[key]
 
         // If computation not started
         if (future == null) {
-            val futureTask = GlobalScope.async {
-                computeFunction(key)
+            future = cache.computeIfAbsent(key) {
+                LOG.debug { "Recomputing value" }
+                async {
+                    computeFunction(key)
+                }
             }
-
-            future = cache.putIfAbsent(key, futureTask)
 
             // Start computation if it hasn't been started in the meantime
             if (future == null) {
-                println("Computing")
-                future = futureTask
+                future = cache[key]!!
+                future.start()
                 startedComputation = true
+            } else {
+                LOG.debug { "Debounced... Waiting for result" }
             }
         }
 
         // Get result if ready, otherwise block and wait
-        return runBlocking {
-            future.await().also {
-                // If this coroutine started the computation
-                // remove it from the cache upon completion
-                if (startedComputation) {
-                    cache -= key
-                }
+        future.await().also {
+            // If this coroutine started the computation
+            // remove it from the cache upon completion
+            if (startedComputation) {
+                onComplete(key, it)
+                cache -= key
             }
         }
     }
