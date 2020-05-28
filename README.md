@@ -10,7 +10,7 @@
 ## Add Guice module to injector
 
 ```kotlin
-val injector = Guice.createInjector(SimpleCacheModule())
+val injector = Guice.createInjector(KacheModule())
 ```
 
 ## Define a fetcher

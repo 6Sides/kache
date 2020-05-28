@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule
 import serialize.KryoSerializer
 import serialize.Serializer
 
-class SimpleCacheModule: AbstractModule() {
+class KacheModule: AbstractModule() {
 
     override fun configure() {
         bind(CacheStore::class.java).to(InMemoryCache::class.java)
