@@ -31,6 +31,7 @@ class MemoizedComputer<K, V>(private val computeFunction: (key: K) -> V) {
 
             // Start computation if it hasn't been started in the meantime
             if (future == null) {
+                println("Computing")
                 future = futureTask
                 startedComputation = true
             }
