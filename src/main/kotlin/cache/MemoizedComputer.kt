@@ -27,6 +27,7 @@ class MemoizedComputer<K, V>(private val computeFunction: (key: K) -> V) {
         if (future == null) {
             future = cache.computeIfAbsent(key) {
                 LOG.debug { "Recomputing value" }
+                startedComputation = true
                 async {
                     computeFunction(key)
                 }
@@ -35,8 +36,6 @@ class MemoizedComputer<K, V>(private val computeFunction: (key: K) -> V) {
             // Start computation if it hasn't been started in the meantime
             if (future == null) {
                 future = cache[key]!!
-                future.start()
-                startedComputation = true
             } else {
                 LOG.debug { "Debounced... Waiting for result" }
             }
