@@ -1,8 +1,8 @@
 package cache
 
 import com.google.inject.Inject
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import logging.logger
 import serialize.Serializer
 import java.util.concurrent.ConcurrentHashMap
@@ -69,14 +69,14 @@ abstract class CachedFetcher<K, V> @Inject protected constructor(
      * @param key The key to store the result at.
      * @param result The object to serialize and store.
      */
-    protected fun cacheResult(key: K, result: CacheableResult<V>) {
+    protected fun cacheResult(key: K, result: CacheableResult<V>) = runBlocking {
         LOG.debug { "Caching $key -> ${result.result} (Expires in ${result.ttl} seconds)" }
 
         val res = collisionCache.putIfAbsent(key, result)
 
         // If cache doesn't contain value begin process of caching it
         if (res == null) {
-            GlobalScope.launch {
+            launch {
                 val resultBytes = serializer.writeObject(result)
                 cache.setWithExpiry(generateHash(key).toString(), resultBytes, result.ttl.toLong())
                 collisionCache -= key

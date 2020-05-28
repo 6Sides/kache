@@ -25,17 +25,20 @@ class MemoizedComputer<K, V>(private val computeFunction: (key: K) -> V) {
 
         // If computation not started
         if (future == null) {
-            future = cache.computeIfAbsent(key) {
-                LOG.debug { "Recomputing value" }
-                startedComputation = true
-                async {
-                    computeFunction(key)
-                }
+            val futureTask = async(start = CoroutineStart.LAZY) {
+                computeFunction(key)
+            }
+
+            future = synchronized(this) {
+                cache.putIfAbsent(key, futureTask)
             }
 
             // Start computation if it hasn't been started in the meantime
             if (future == null) {
-                future = cache[key]!!
+                future = futureTask
+                future.start()
+                LOG.debug { "Recomputing value" }
+                startedComputation = true
             } else {
                 LOG.debug { "Debounced... Waiting for result" }
             }
@@ -46,8 +49,10 @@ class MemoizedComputer<K, V>(private val computeFunction: (key: K) -> V) {
             // If this coroutine started the computation
             // remove it from the cache upon completion
             if (startedComputation) {
-                onComplete(key, it)
                 cache -= key
+                launch {
+                    onComplete(key, it)
+                }
             }
         }
     }
